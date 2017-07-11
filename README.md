@@ -1,4 +1,4 @@
-# canvasGames
+# Canvas Games
 
 Arcade games with JavaScript Canvas
 
