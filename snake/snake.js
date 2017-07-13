@@ -2,21 +2,37 @@ var canv = document.getElementById('canvas');
 var ctx = canv.getContext('2d');
 
 var block = {
-  w: 10,
-  h: 10
+  w: 20,
+  h: 20
 };
 
-xv = yv = 0;
+var velocity = 2;
+// Tails array
+var tail = [];
 
+// snake object
 var snake = {
   x: canv.width / 2,
   y: canv.height / 2,
   xv: 0.2,
   yv: 0,
-  length: 1,
   color: '#ffffff'
 };
 
+//Add snake tail
+tail.push({
+  x: snake.x,
+  y: snake.y
+});
+
+for (var i = 0; i < 5; i++) {
+  tail.push({
+    x: snake.x + block.w + 1,
+    y: snake.y + block.h + 1
+  });
+}
+
+// Apple
 var apple = {
   color: '#ff0000',
   x: canv.width * Math.random(),
@@ -47,33 +63,33 @@ document.addEventListener('keydown', function (event) {
   const keyCode = event.keyCode;
 
   if (keyCode == 39) {
-    snake.xv = 0.5;
+    snake.xv = velocity;
     snake.yv = 0;
   } else if (keyCode == 37) {
-    snake.xv = -0.5;
+    snake.xv = -velocity;
     snake.yv = 0;
   } else if (keyCode == 38) {
-    snake.yv = -0.5;
+    snake.yv = -velocity;
     snake.xv = 0;
   } else if (keyCode == 40) {
-    snake.yv = 0.5;
+    snake.yv = velocity;
     snake.xv = 0;
   }
 });
 
+/**
+ * Draw game objects
+ */
 function game() {
-
+  // clear canvas
   ctx.clearRect(0, 0, canv.width, canv.height);
+
   // paint canvas
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, canv.width, canv.height);
 
-  // draw apple at random position
-  ctx.fillStyle = apple.color;
-  ctx.fillRect(apple.x,
-    apple.y,
-    block.w,
-    block.h);
+  // Draw apple
+  drawApple();
 
   // Draw snake
   ctx.fillStyle = snake.color;
@@ -81,20 +97,22 @@ function game() {
   // Check if snake is colliding with walls
   checkSnakePosition();
 
-  for (var i = 0; i < snake.length; i++) {
-    // snake.x + (i * 11)
-    ctx.fillRect(snake.x,
-      snake.y,
+  // detect collision
+  collisionDetection();
+
+  // Draw snake
+  for (var i = 0; i < tail.length; i++) {
+    ctx.fillRect(tail[i].x,
+      tail[i].y,
       block.w,
       block.h);
   }
 
-  snake.x += snake.xv;
-  snake.y += snake.yv;
-
+  tail = updateTail();
   window.requestAnimationFrame(game);
 }
 
+updateTail();
 game();
 
 /**
@@ -102,13 +120,58 @@ game();
  * changes it's x and y values;
  */
 function checkSnakePosition() {
-  if (snake.x >= (canv.width + block.w)) {
-    snake.x = 0;
-  } else if (snake.x <= -block.w) {
-    snake.x = canv.width - block.w;
-  } else if (snake.y >= (canv.height + block.h)) {
-    snake.y = 0;
-  } else if (snake.y <= -block.h) {
-    snake.y = canv.height - block.h;
+  if (tail[0].x >= (canv.width + block.w)) {
+    tail[0].x = 0;
+  } else if (tail[0].x <= -block.w) {
+    tail[0].x = canv.width - block.w;
+  } else if (tail[0].y >= (canv.height + block.h)) {
+    tail[0].y = 0;
+  } else if (tail[0].y <= -block.h) {
+    tail[0].y = canv.height - block.h;
+  }
+}
+
+// draw apple at random position
+function drawApple() {
+  ctx.fillStyle = apple.color;
+  ctx.fillRect(apple.x,
+    apple.y,
+    block.w,
+    block.h);
+}
+
+/**
+ * Returns updated positiond for snake
+ */
+function updateTail() {
+  return tail.map((item, i) => {
+    if (i == 0) {
+      return {
+        x: item.x + snake.xv,
+        y: item.y + snake.yv
+      }
+    } else {
+      return tail[i - 1];
+    }
+  });
+}
+
+/**
+ * Check if snake colliding with apple
+ */
+function collisionDetection() {
+  if ((tail[0].x <= apple.x + block.w && tail[0].x >= apple.x) &&
+    (tail[0].y <= apple.y + block.h && tail[0].y >= apple.y)
+  ) {
+    console.log('Collided');
+    apple.x = canv.width * Math.random();
+    apple.y = canv.height * Math.random();
+
+    tail.push({
+      x: snake.x + block.w + 1,
+      y: snake.y + block.h + 1
+    });
+
+    console.log(tail.length);
   }
 }
