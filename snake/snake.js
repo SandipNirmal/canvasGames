@@ -2,11 +2,11 @@ var canv = document.getElementById('canvas');
 var ctx = canv.getContext('2d');
 
 var block = {
-  w: 20,
-  h: 20
+  w: 5,
+  h: 5
 };
 
-var velocity = 2;
+var velocity = 5;
 // Tails array
 var tail = [];
 
@@ -20,12 +20,7 @@ var snake = {
 };
 
 //Add snake tail
-tail.push({
-  x: snake.x,
-  y: snake.y
-});
-
-for (var i = 0; i < 5; i++) {
+for (var i = 0; i < 2; i++) {
   tail.push({
     x: snake.x + block.w + 1,
     y: snake.y + block.h + 1
@@ -109,7 +104,8 @@ function game() {
   }
 
   tail = updateTail();
-  window.requestAnimationFrame(game);
+  // window.requestAnimationFrame(game);
+  window.setTimeout(game, 1000 / 10);
 }
 
 updateTail();
@@ -160,9 +156,8 @@ function updateTail() {
  * Check if snake colliding with apple
  */
 function collisionDetection() {
-  if ((tail[0].x <= apple.x + block.w && tail[0].x >= apple.x) &&
-    (tail[0].y <= apple.y + block.h && tail[0].y >= apple.y)
-  ) {
+  if (tail[0].x <= apple.x + block.w && tail[0].x >= apple.x &&
+    tail[0].y <= apple.y + block.h && tail[0].y >= apple.y) {
     console.log('Collided');
     apple.x = canv.width * Math.random();
     apple.y = canv.height * Math.random();
@@ -171,7 +166,5 @@ function collisionDetection() {
       x: snake.x + block.w + 1,
       y: snake.y + block.h + 1
     });
-
-    console.log(tail.length);
   }
 }
